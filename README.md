@@ -4,7 +4,7 @@
 
 このゲームは、リズムに合わせて障害物を避ける、リズムランナーゲームのプロトタイプです。
 「目視不可能な速度で迫る障害物を、リズムを頼りに回避する」という体験の面白さを検証することを目的としています。
-<img width="819" height="474" alt="スクリーンショット 2025-11-21 0 23 30" src="https://github.com/user-attachments/assets/503e74b1-1be3-4a5b-a88b-b118037d729f" />
+<img width="833" height="477" alt="スクリーンショット 2025-11-21 0 24 58" src="https://github.com/user-attachments/assets/af7d0fb8-b138-4eab-8133-fcc2fdbf4dd2" />
 
 ****
 ## プレイ環境
