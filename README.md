@@ -18,9 +18,8 @@ https://noutetu.github.io/PLProto/index.html
 
 ## 操作方法
 
-<img width="1501" height="945" alt="スクリーンショット 2025-11-21 0 15 11" src="https://github.com/user-attachments/assets/2207826b-68f1-4fe7-b49f-8d6611147e8c" />
+<img width="1505" height="934" alt="スクリーンショット 2025-11-21 0 36 08" src="https://github.com/user-attachments/assets/99bf2cc1-5f67-4737-aa10-eba8c097872c" />
 
-****
 
 ## ゲーム概要
 
