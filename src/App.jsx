@@ -53,7 +53,7 @@ function TitleScreen({ onStart }) {
           <span className="bpm-display">BPM: 120</span>
           <span className="status-ready">● READY</span>
         </div>
-        <h1 className="game-title">PRIMITIVE LIGHTS</h1>
+        <h1 className="game-title">HEARTBEAT RUNNER</h1>
         <div className="ecg-line-container">
           <svg className="ecg-line" viewBox="0 0 1000 100" preserveAspectRatio="none">
             <defs>
@@ -119,7 +119,7 @@ function TitleScreen({ onStart }) {
 
       <div className="game-instructions">
         <div className="instruction-section">
-          <h3>操作</h3>
+          <h3>操作(ジャンプ)</h3>
           <p><strong>PC:</strong> スペース または 左クリック</p>
           <p><strong>スマートフォン:</strong> 画面タップ</p>
         </div>
