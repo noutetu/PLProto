@@ -139,16 +139,26 @@ function TitleScreen({ onStart }) {
   );
 }
 
+
 function ResultScreen({ result, onRetry, onTitle }) {
+  const getResultStatus = () => {
+    if (!result.clear) return { title: "RANK C", color: "#ff0000", status: "FAILED" };
+    if (result.missCount === 0) return { title: "RANK PERFECT", color: "#00ffff", status: "PERFECT" };
+    if (result.missCount <= 2) return { title: "RANK A", color: "#00ff41", status: "EXCELLENT" };
+    return { title: "RANK B", color: "#ffff00", status: "GOOD" };
+  };
+
+  const { title, color, status } = getResultStatus();
+
   return (
     <div className="screen result-screen">
-      <div className="result-monitor">
+      <div className="result-monitor" style={{ borderColor: color, boxShadow: `0 0 30px ${color}66, inset 0 0 30px ${color}1a` }}>
         <div className="result-header">
-          <span className="timestamp">{new Date().toLocaleTimeString()}</span>
-          <span className="status">{result.clear ? "● STABLE" : "● CRITICAL"}</span>
+          <span className="timestamp" style={{ color: color }}>{new Date().toLocaleTimeString()}</span>
+          <span className="status" style={{ color: color }}>● {status}</span>
         </div>
-        <h2 className="result-title">
-          {result.clear ? "CARDIAC RHYTHM: STABLE" : "CARDIAC ARREST DETECTED"}
+        <h2 className="result-title" style={{ color: color, textShadow: `0 0 10px ${color}` }}>
+          {title}
         </h2>
         <div className="ecg-result">
           <svg className="ecg-line" viewBox="0 0 800 100" preserveAspectRatio="none">
@@ -184,7 +194,7 @@ function ResultScreen({ result, onRetry, onTitle }) {
           </div>
           <div className="info-item">
             <span className="info-label">STATUS</span>
-            <span className="info-value">{result.clear ? "NORMAL" : "FAILED"}</span>
+            <span className="info-value" style={{ color: color }}>{status}</span>
           </div>
         </div>
       </div>
