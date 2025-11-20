@@ -120,15 +120,16 @@ function TitleScreen({ onStart }) {
       <div className="game-instructions">
         <div className="instruction-section">
           <h3>操作</h3>
-          <p><strong>スペース</strong> または <strong>タップ</strong> でジャンプ</p>
+          <p><strong>PC:</strong> スペース または 左クリック</p>
+          <p><strong>スマートフォン:</strong> 画面タップ</p>
         </div>
 
         <div className="instruction-section">
           <h3>ガイド</h3>
-          <p><span style={{ color: '#00ff00' }}>●</span> 緑の信号でジャンプ</p>
+          <p><span style={{ color: '#ffffff' }}>■</span> 白い障害物を避けよう</p>
         </div>
 
-        <p className="audio-warning">※ 音声必須（ヘッドホン推奨）</p>
+        <p className="audio-warning">※ 音声必須</p>
       </div>
 
       <button className="start-btn" onClick={onStart}>

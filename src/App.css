@@ -218,19 +218,19 @@
 .instruction-section h3 {
   font-size: 1.2rem;
   color: #00ff41;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 1rem 0;
   letter-spacing: 0.1em;
 }
 
 .instruction-section p {
   font-size: 1rem;
-  color: rgba(0, 255, 65, 0.9);
-  margin: 0.3rem 0;
+  color: #ffffff;
+  margin: 0.5rem 0;
   line-height: 1.6;
 }
 
 .instruction-section strong {
-  color: #00ff41;
+  color: #ffffff;
   font-weight: bold;
 }
 
