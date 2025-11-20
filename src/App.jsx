@@ -17,15 +17,15 @@ const SCREEN_RESULT = 'RESULT';
 function App() {
   const [screen, setScreen] = useState(SCREEN_TITLE);
   const [score, setScore] = useState(0);
-  const [lastResult, setLastResult] = useState({ score: 0, clear: false });
+  const [lastResult, setLastResult] = useState({ score: 0, missCount: 0, clear: false });
 
   const startGame = () => {
     audioManager.init(); // Initialize AudioContext on user gesture
     setScreen(SCREEN_GAME);
   };
 
-  const endGame = (finalScore, isClear) => {
-    setLastResult({ score: finalScore, clear: isClear });
+  const endGame = (finalScore, isClear, missCount) => {
+    setLastResult({ score: finalScore, clear: isClear, missCount: missCount || 0 });
     setScreen(SCREEN_RESULT);
     if (isClear) {
       audioManager.playSynthSFX('clear');
@@ -159,11 +159,19 @@ function ResultScreen({ result, onRetry, onTitle }) {
           </svg>
         </div>
 
-        {/* Main Score - Distance */}
+        {/* Main Score - Distance & Miss */}
         <div className="main-score">
-          <div className="score-label">DISTANCE</div>
-          <div className="score-value">
-            {Math.floor(result.score)} <span className="unit">m</span>
+          <div className="score-item">
+            <div className="score-label">DISTANCE</div>
+            <div className="score-value">
+              {Math.floor(result.score)} <span className="unit">m</span>
+            </div>
+          </div>
+          <div className="score-item">
+            <div className="score-label">MISS</div>
+            <div className="score-value">
+              {result.missCount}
+            </div>
           </div>
         </div>
 
@@ -200,6 +208,7 @@ function GameScreen({ onEnd }) {
     obstacles: [],
     guides: [],
     score: 0,
+    missCount: 0,
     life: 3,
     beatTime: 0,
     nextBeat: 0,
@@ -220,6 +229,7 @@ function GameScreen({ onEnd }) {
       obstacles: [],
       guides: [], // { x, type: 'rhythm' | 'jump', hit: false }
       score: 0,
+      missCount: 0,
       life: 3,
       beatTime: 0,
       nextBeat: 0,
@@ -500,6 +510,7 @@ function GameScreen({ onEnd }) {
         if (xCollision && yCollision) {
           obs.hit = true;
           gameState.current.life--;
+          gameState.current.missCount++;
           gameState.current.flash = { color: 'red', intensity: 1.0 }; // Max intensity for hit
           audioManager.playSynthSFX('hit');
         }
@@ -508,14 +519,14 @@ function GameScreen({ onEnd }) {
       // Check Game Over
       if (gameState.current.life <= 0) {
         const finalScore = Math.floor(gameState.current.distance / 100);
-        onEnd(finalScore, false);
+        onEnd(finalScore, false, gameState.current.missCount);
         return; // Stop loop
       }
 
       // Check Clear (End of song)
       if (currentSongTime > 120) { // 120 seconds
         const finalScore = Math.floor(gameState.current.distance / 100);
-        onEnd(finalScore, true);
+        onEnd(finalScore, true, gameState.current.missCount);
         return;
       }
 
