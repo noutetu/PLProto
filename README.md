@@ -14,7 +14,7 @@ https://noutetu.github.io/PLProto/index.html
 下記環境でのプレイを推奨しています：
 
 *   **PC** (ブラウザ)
-*   **iPad** (横画面)
+*   **iPad** (横画面)⚠️ヘッドホン/イヤホン必須
 
 ## 操作方法
 
