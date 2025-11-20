@@ -210,7 +210,7 @@ function GameScreen({ onEnd }) {
     guides: [],
     score: 0,
     missCount: 0,
-    life: 3,
+    life: 5,
     beatTime: 0,
     nextBeat: 0,
     beatCount: 0
@@ -231,7 +231,7 @@ function GameScreen({ onEnd }) {
       guides: [], // { x, type: 'rhythm' | 'jump', hit: false }
       score: 0,
       missCount: 0,
-      life: 3,
+      life: 5,
       beatTime: 0,
       nextBeat: 0,
       beatCount: 0,
@@ -705,10 +705,13 @@ function GameScreen({ onEnd }) {
       ctx.shadowColor = '#00ff41';
 
       // Heart rate zones (life display)
-      const lifeColor = gameState.current.life === 3 ? '#00ff41' :
-        gameState.current.life === 2 ? '#ffff00' : '#ff0000';
+      // Heart rate zones (life display)
+      const life = gameState.current.life;
+      const lifeColor = life >= 4 ? '#00ff41' : // High (4-5) Green
+        life >= 2 ? '#ffff00' : '#ff0000';      // Medium (2-3) Yellow / Low (1) Red
       ctx.fillStyle = lifeColor;
-      ctx.fillText(`HR: ${gameState.current.life === 3 ? 'NORMAL' : gameState.current.life === 2 ? 'ELEVATED' : 'CRITICAL'}`, 20, 30);
+      const lifeString = "●".repeat(Math.max(0, life));
+      ctx.fillText(`LIFE: ${lifeString}`, 20, 30);
 
       // BPM display
       ctx.fillStyle = '#00ff41';
