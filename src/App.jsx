@@ -791,7 +791,11 @@ function GameScreen({ onEnd, level }) {
     };
   }, [onEnd]);
 
-  return <canvas ref={canvasRef} width={GAME_WIDTH} height={GAME_HEIGHT} style={{ width: '100%', maxWidth: '800px', border: '1px solid #333' }} />;
+  return (
+    <div className="game-container">
+      <canvas ref={canvasRef} width={GAME_WIDTH} height={GAME_HEIGHT} />
+    </div>
+  );
 }
 
 export default App
