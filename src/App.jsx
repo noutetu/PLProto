@@ -288,7 +288,7 @@ function GameScreen({ onEnd, level }) {
     // Initialize Game State
     gameState.current = {
       startTime: firstBeatTime, // Sync with audio
-      lastFrameTime: audioManager.getRawTime(), // Track frame time
+      lastFrameTime: performance.now() / 1000, // Track frame time using system clock
       player: { x: GAME_CONFIG.PLAYER.START_X, y: GAME_CONFIG.PHYSICS.GROUND_Y, width: GAME_CONFIG.PLAYER.WIDTH, height: GAME_CONFIG.PLAYER.HEIGHT, velocity: 0, isJumping: false, groundY: GAME_CONFIG.PHYSICS.GROUND_Y },
       obstacles: [],
       guides: [], // { x, type: 'rhythm' | 'jump', hit: false }
@@ -381,7 +381,7 @@ function GameScreen({ onEnd, level }) {
 
 
     const update = () => {
-      const now = audioManager.getRawTime();
+      const now = performance.now() / 1000; // Use system time for physics
 
       // Calculate Delta Time
       let dt = now - gameState.current.lastFrameTime;
@@ -391,7 +391,8 @@ function GameScreen({ onEnd, level }) {
       // Cap at 0.1s (10 FPS)
       if (dt > 0.1) dt = 0.1;
 
-      const currentSongTime = now - gameState.current.startTime;
+      const audioTime = audioManager.getRawTime();
+      const currentSongTime = audioTime - gameState.current.startTime;
       gameState.current.distance = currentSongTime * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
 
       // End of level check
