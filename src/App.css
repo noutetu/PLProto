@@ -714,3 +714,93 @@
   color: #555;
   margin-top: 2rem;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .app-container {
+    /* Allow scrolling on title/result screens if content overflows */
+    overflow-y: auto;
+    height: auto;
+    /* Allow height to grow */
+    min-height: 100vh;
+    align-items: flex-start;
+    /* Start from top on small screens */
+    padding: 1rem;
+  }
+
+  .screen {
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .game-title {
+    font-size: 2rem;
+    /* Smaller title */
+    word-break: break-word;
+  }
+
+  .ecg-monitor {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
+
+  .result-monitor {
+    min-width: auto;
+    /* Remove fixed min-width */
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
+
+  .score-value {
+    font-size: 3rem;
+    /* Smaller score font */
+  }
+
+  .score-value .unit {
+    font-size: 1.5rem;
+  }
+
+  .main-score {
+    grid-template-columns: 1fr;
+    /* Stack score items */
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .button-container {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
+
+  .start-btn,
+  .retry-btn,
+  .title-btn {
+    width: 100%;
+    /* Full width buttons */
+    padding: 1rem;
+    font-size: 1.2rem;
+    box-sizing: border-box;
+  }
+
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  /* Hide scanlines on mobile to improve performance/visibility */
+  .app-container::before {
+    display: none;
+  }
+}
+
+/* Ensure canvas fits and prevents gestures */
+canvas {
+  max-width: 100%;
+  height: auto;
+  touch-action: none;
+  /* Prevent browser gestures on the game canvas */
+}
