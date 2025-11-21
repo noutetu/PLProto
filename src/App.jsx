@@ -1,26 +1,65 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { audioManager } from './audio/AudioContextManager';
+import { TutorialLevel, MainLevel } from './levels/LevelData';
 
 // Game Constants
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 450;
-const SCROLL_SPEED = 10000; // Pixels per second
-const BPM = 120; // Beats per minute
-const BEAT_INTERVAL = 60 / BPM;
 
 // Game States
 const SCREEN_TITLE = 'TITLE';
 const SCREEN_GAME = 'GAME';
 const SCREEN_RESULT = 'RESULT';
 
+// Game Configuration (New)
+const GAME_CONFIG = {
+  PHYSICS: {
+    SCROLL_SPEED: 10000, // Pixels per second
+    GRAVITY: 8000, // Pixels/s^2
+    JUMP_VELOCITY: -4000, // Pixels/s
+    GROUND_Y: 300, // Player's ground position
+  },
+  RHYTHM: {
+    // BPM is now defined in Level Data
+    BEAT_INTERVAL: 60 / 120, // Default, will be updated by level
+  },
+  PLAYER: {
+    WIDTH: 30,
+    HEIGHT: 30,
+    START_X: 100,
+  },
+  OBSTACLE: {
+    WIDTH: 40,
+    HEIGHT: 40,
+    OFFSET_X: 400, // Obstacle appears this far after its beat
+  },
+  GUIDE: {
+    WIDTH: 20,
+    HEIGHT: 20,
+  },
+  GAMEPLAY: {
+    INITIAL_LIFE: 5,
+    MAX_LIFE: 5,
+    SCORE_MULTIPLIER: 100, // Distance to score conversion
+  },
+  VISUALS: {
+    FLASH_DECAY: 0.04,
+    SHAKE_DECAY: 0.5,
+    TRAIL_DECAY: 0.05,
+    PARTICLE_GRAVITY: 500,
+  }
+};
+
 function App() {
   const [screen, setScreen] = useState(SCREEN_TITLE);
   const [score, setScore] = useState(0);
-  const [lastResult, setLastResult] = useState({ score: 0, missCount: 0, clear: false });
+  const [lastResult, setLastResult] = useState({ score: 0, clear: false, missCount: 0 });
+  const [currentLevel, setCurrentLevel] = useState(MainLevel); // Default level
 
-  const startGame = () => {
+  const startGame = (level) => {
     audioManager.init(); // Initialize AudioContext on user gesture
+    setCurrentLevel(level); // Set the level data
     setScreen(SCREEN_GAME);
   };
 
@@ -39,8 +78,8 @@ function App() {
   return (
     <div className="app-container">
       {screen === SCREEN_TITLE && <TitleScreen onStart={startGame} />}
-      {screen === SCREEN_GAME && <GameScreen onEnd={endGame} />}
-      {screen === SCREEN_RESULT && <ResultScreen result={lastResult} onRetry={startGame} onTitle={toTitle} />}
+      {screen === SCREEN_GAME && <GameScreen onEnd={endGame} level={currentLevel} />}
+      {screen === SCREEN_RESULT && <ResultScreen result={lastResult} onRetry={() => startGame(currentLevel)} onTitle={toTitle} />}
     </div>
   )
 }
@@ -133,10 +172,10 @@ function TitleScreen({ onStart }) {
       </div>
 
       <div className="button-container">
-        <button className="start-btn secondary-btn" onClick={onStart}>
+        <button className="start-btn secondary-btn" onClick={() => onStart(TutorialLevel)}>
           <span className="btn-icon">▶</span> チュートリアル
         </button>
-        <button className="start-btn primary-btn" onClick={onStart}>
+        <button className="start-btn primary-btn" onClick={() => onStart(MainLevel)}>
           <span className="btn-icon">▶</span> START GAME
         </button>
       </div>
@@ -215,20 +254,22 @@ function ResultScreen({ result, onRetry, onTitle }) {
   );
 }
 
-function GameScreen({ onEnd }) {
+function GameScreen({ onEnd, level }) {
   const canvasRef = useRef(null);
   const requestRef = useRef();
   const gameState = useRef({
-    startTime: 0,
-    player: { y: 0, velocity: 0, isJumping: false },
+    player: { x: 100, y: GAME_CONFIG.PHYSICS.GROUND_Y, width: 30, height: 30, velocity: 0, isJumping: false, groundY: GAME_CONFIG.PHYSICS.GROUND_Y },
     obstacles: [],
     guides: [],
     score: 0,
-    missCount: 0,
-    life: 5,
-    beatTime: 0,
-    nextBeat: 0,
-    beatCount: 0
+    life: 3, // 3 hits allowed
+    startTime: 0,
+    distance: 0,
+    screenShake: { x: 0, y: 0, intensity: 0 },
+    flash: { color: '', intensity: 0 },
+    particles: [],
+    stars: [],
+    backgroundOffset: 0
   });
 
   useEffect(() => {
@@ -236,17 +277,20 @@ function GameScreen({ onEnd }) {
     const ctx = canvas.getContext('2d');
 
     // Start Drum Loop and sync game start time
-    const firstBeatTime = audioManager.startDrumLoop(BPM);
+    // Use level BPM
+    const bpm = level.bpm || 120;
+    const beatInterval = 60 / bpm;
+    const firstBeatTime = audioManager.startDrumLoop(bpm);
 
     // Initialize Game State
     gameState.current = {
       startTime: firstBeatTime, // Sync with audio
-      player: { x: 100, y: 300, width: 30, height: 30, velocity: 0, isJumping: false, groundY: 300 },
+      player: { x: GAME_CONFIG.PLAYER.START_X, y: GAME_CONFIG.PHYSICS.GROUND_Y, width: GAME_CONFIG.PLAYER.WIDTH, height: GAME_CONFIG.PLAYER.HEIGHT, velocity: 0, isJumping: false, groundY: GAME_CONFIG.PHYSICS.GROUND_Y },
       obstacles: [],
       guides: [], // { x, type: 'rhythm' | 'jump', hit: false }
       score: 0,
+      life: GAME_CONFIG.GAMEPLAY.INITIAL_LIFE,
       missCount: 0,
-      life: 5,
       beatTime: 0,
       nextBeat: 0,
       beatCount: 0,
@@ -271,112 +315,61 @@ function GameScreen({ onEnd }) {
       });
     }
 
-    // Generate initial pattern
-    // In a real game, this would be parsed from a map file
-    const generateLevel = () => {
+    // Level Generation Logic
+    const generateLevel = (levelData) => {
       const pattern = [];
-      const totalDuration = 120; // 2 minutes
 
-      // Helper function to add notes at specific time intervals
+      // Helper function to add notes
       const addNote = (time, type) => {
-        const x = 100 + time * SCROLL_SPEED;
-        pattern.push({ type, x, time, y: 315 });
+        const x = 100 + time * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
+        pattern.push({ type, x, time, y: GAME_CONFIG.PHYSICS.GROUND_Y });
       };
 
       const addObstacle = (time) => {
-        const x = 100 + time * SCROLL_SPEED;
+        const x = 100 + time * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
         pattern.push({ type: 'obstacle', x: x + 400, width: 40, height: 40 });
       };
 
-      // Define rhythm patterns (each is 4 beats)
-      // Each pattern is an array of note timings within 4 beats
-      const rhythmPatterns = [
-        // Pattern 0: Simple quarter notes
-        [0, 1, 2],
-        // Pattern 1: Quarter + eighth notes
-        [0, 1, 1.5, 2],
-        // Pattern 2: Eighth note pairs
-        [0, 0.5, 1, 1.5, 2],
-        // Pattern 3: Sixteenth note burst at start
-        [0, 0.25, 0.5, 0.75, 1, 2],
-        // Pattern 4: Syncopated rhythm
-        [0, 0.5, 1.5, 2],
-        // Pattern 5: Dense eighths
-        [0, 0.5, 1, 1.5, 2, 2.5],
-        // Pattern 6: Sixteenth triplets
-        [0, 0.33, 0.66, 1, 2],
-        // Pattern 7: Mixed density
-        [0, 0.25, 0.5, 1, 2],
-        // Pattern 8: Sparse with burst
-        [0, 1.75, 2, 2.25, 2.5, 2.75],
-        // Pattern 9: Galloping rhythm
-        [0, 0.25, 1, 1.25, 2],
-        // Pattern 10: Double time
-        [0, 0.5, 1, 1.5, 2, 2.5],
-        // Pattern 11: Sixteenth run
-        [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
-        // Pattern 12: Off-beat emphasis
-        [0.5, 1, 1.5, 2, 2.5],
-        // Pattern 13: Complex syncopation
-        [0, 0.25, 0.75, 1.5, 2, 2.75],
-        // Pattern 14: Rapid fire
-        [0, 0.125, 0.25, 0.375, 0.5, 1, 2],
-        // Pattern 15: Swing feel
-        [0, 0.66, 1, 1.66, 2]
-      ];
-
+      // Use phases from level data
+      const phases = levelData.phases;
       let currentTime = 0;
-      let measureCount = 0;
 
-      while (currentTime < totalDuration) {
-        // Select pattern based on progression
-        let patternIndex;
-        if (measureCount < 8) {
-          // Early game: simpler patterns (0-3)
-          patternIndex = Math.floor(Math.random() * 4);
-        } else if (measureCount < 16) {
-          // Mid game: medium complexity (0-7)
-          patternIndex = Math.floor(Math.random() * 8);
-        } else if (measureCount < 24) {
-          // Late-mid game: higher complexity (0-11)
-          patternIndex = Math.floor(Math.random() * 12);
-        } else {
-          // End game: all patterns
-          patternIndex = Math.floor(Math.random() * rhythmPatterns.length);
-        }
+      // Iterate through phases
+      phases.forEach(phase => {
+        for (let m = 0; m < phase.duration; m++) {
+          const measureStartTime = currentTime;
 
-        const selectedPattern = rhythmPatterns[patternIndex];
-        const measureStartTime = currentTime;
+          // 1. Rhythm Guides (Yellow)
+          // Select a random pattern valid for this phase
+          const patIdx = Math.floor(Math.random() * phase.rhythmPatterns.length);
+          const selectedPattern = phase.rhythmPatterns[patIdx];
 
-        // Add rhythm notes for this measure
-        selectedPattern.forEach(offset => {
-          const noteTime = measureStartTime + offset * BEAT_INTERVAL;
-          if (noteTime < totalDuration) {
-            addNote(noteTime, 'rhythm');
-          }
-        });
+          selectedPattern.forEach(offset => {
+            // Only add rhythm guide if it doesn't overlap with jump or obstacle
+            // (Simple check: strictly less than jump beat)
+            if (offset < phase.jumpBeat) {
+              const noteTime = measureStartTime + offset * beatInterval;
+              addNote(noteTime, 'rhythm');
+            }
+          });
 
-        // Add jump guide on beat 3 (index 2)
-        const jumpTime = measureStartTime + 2 * BEAT_INTERVAL;
-        if (jumpTime < totalDuration) {
+          // 2. Jump Guide (Green)
+          const jumpTime = measureStartTime + phase.jumpBeat * beatInterval;
           addNote(jumpTime, 'jump');
-        }
 
-        // Add obstacle on beat 4 (index 3)
-        const obstacleTime = measureStartTime + 3 * BEAT_INTERVAL;
-        if (obstacleTime < totalDuration) {
+          // 3. Obstacle (Red)
+          const obstacleTime = measureStartTime + phase.obstacleBeat * beatInterval;
           addObstacle(obstacleTime);
-        }
 
-        // Move to next measure (4 beats)
-        currentTime += 4 * BEAT_INTERVAL;
-        measureCount++;
-      }
+          // Advance time by measure length
+          currentTime += phase.beatsPerMeasure * beatInterval;
+        }
+      });
 
       return pattern;
     };
 
-    const levelData = generateLevel();
+    const levelData = generateLevel(level);
     gameState.current.guides = levelData.filter(d => d.type !== 'obstacle');
     gameState.current.obstacles = levelData.filter(d => d.type === 'obstacle');
 
@@ -384,7 +377,7 @@ function GameScreen({ onEnd }) {
     const update = () => {
       const now = audioManager.getRawTime();
       const currentSongTime = now - gameState.current.startTime;
-      gameState.current.distance = currentSongTime * SCROLL_SPEED;
+      gameState.current.distance = currentSongTime * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
 
       // Player Physics
       const player = gameState.current.player;
@@ -441,7 +434,7 @@ function GameScreen({ onEnd }) {
       gameState.current.backgroundOffset = (gameState.current.distance * 0.5) % 100;
 
       // Update Stars (parallax scrolling)
-      const speed = SCROLL_SPEED / 60; // Convert to per-frame speed
+      const speed = GAME_CONFIG.PHYSICS.SCROLL_SPEED / 60; // Convert to per-frame speed
       gameState.current.stars.forEach(star => {
         // Stars move based on depth (z) - closer stars move faster
         star.x -= speed * star.z * 0.5;
@@ -609,7 +602,7 @@ function GameScreen({ onEnd }) {
       ctx.stroke();
 
       // Rhythm pulse indicator
-      const beatPhase = (gameState.current.distance / (SCROLL_SPEED * BEAT_INTERVAL)) % 1;
+      const beatPhase = (gameState.current.distance / (GAME_CONFIG.PHYSICS.SCROLL_SPEED * beatInterval)) % 1;
       if (beatPhase < 0.1) {
         const pulseAlpha = (1 - beatPhase / 0.1) * 0.3;
         ctx.fillStyle = `rgba(0, 255, 65, ${pulseAlpha})`;
@@ -751,7 +744,7 @@ function GameScreen({ onEnd }) {
       if (e.code === 'Space' || e.type === 'touchstart' || e.type === 'mousedown') {
         if (!gameState.current.player.isJumping) {
           gameState.current.player.isJumping = true;
-          gameState.current.player.velocity = -1500; // Jump force
+          gameState.current.player.velocity = GAME_CONFIG.PHYSICS.JUMP_VELOCITY; // Jump force
 
           // Special jump effects
           gameState.current.screenShake = { x: 0, y: 0, intensity: 8 };
