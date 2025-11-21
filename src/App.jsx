@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { audioManager } from './audio/AudioContextManager';
-import { TutorialLevel, MainLevel } from './levels/LevelData';
+import { TutorialLevel, MainLevel, Pattern1Level, Pattern2Level } from './levels/LevelData';
 
 // Game Constants
 const GAME_WIDTH = 800;
@@ -175,8 +175,11 @@ function TitleScreen({ onStart }) {
         <button className="start-btn secondary-btn" onClick={() => onStart(TutorialLevel)}>
           <span className="btn-icon">▶</span> チュートリアル
         </button>
-        <button className="start-btn primary-btn" onClick={() => onStart(MainLevel)}>
-          <span className="btn-icon">▶</span> START GAME
+        <button className="start-btn round-btn" onClick={() => onStart(Pattern1Level)}>
+          <span className="btn-icon">●</span> パターン1
+        </button>
+        <button className="start-btn round-btn" onClick={() => onStart(Pattern2Level)}>
+          <span className="btn-icon">●</span> パターン2
         </button>
       </div>
     </div>

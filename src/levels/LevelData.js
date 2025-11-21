@@ -69,3 +69,88 @@ export const MainLevel = {
         }
     ]
 };
+
+// Pattern 1: Mixed 4/4 and 3/4 (60 seconds)
+export const Pattern1Level = {
+    name: "PATTERN 1",
+    bpm: 120,
+    phases: [
+        // Phase 1: 4/4 for 20 seconds (10 measures)
+        {
+            name: "PHASE 1 (4/4)",
+            beatsPerMeasure: 4,
+            jumpBeat: 2,
+            obstacleBeat: 3,
+            duration: 10,
+            rhythmPatterns: [
+                [0, 1, 2],
+                [0, 0.5, 1, 1.5, 2],
+                [0, 0.25, 0.5, 0.75, 1, 2],
+                [0, 0.5, 1, 2],
+                [0, 0.25, 0.5, 1, 1.5, 2],
+                [0, 1, 1.25, 1.5, 1.75, 2],
+            ]
+        },
+        // Phase 2: 3/4 for 20 seconds (13 measures)
+        {
+            name: "PHASE 2 (3/4)",
+            beatsPerMeasure: 3,
+            jumpBeat: 1,
+            obstacleBeat: 2,
+            duration: 13,
+            rhythmPatterns: [
+                [0, 1],
+                [0, 0.5, 1],
+                [0, 0.25, 0.5, 0.75, 1],
+                [0, 0.33, 0.66, 1],
+                [0, 0.5, 1, 1.5],
+                [0, 0.25, 0.5, 1],
+            ]
+        },
+        // Phase 3-8: Alternating 3/4 and 4/4 every 2 measures
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.33, 0.66, 1], [0, 0.25, 0.5, 0.75, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 0.25, 0.5, 0.75, 1, 2], [0, 1, 1.25, 1.5, 1.75, 2]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1.5]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 0.25, 0.5, 1, 1.5, 2], [0, 1, 2]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.25, 0.5, 1], [0, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 0.25, 0.5, 0.75, 1, 2], [0, 1, 2]] }
+    ]
+};
+
+// Pattern 2: Chaotic mix of 2/4, 3/4, and 4/4 (90 seconds)
+export const Pattern2Level = {
+    name: "PATTERN 2",
+    bpm: 120,
+    phases: [
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 0.33, 0.66, 1, 1.33, 1.66, 2], [0, 0.25, 0.5, 0.75, 1, 2]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.33, 0.66, 1], [0, 0.25, 0.5, 0.75, 1]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0], [0, 0.5], [0, 0.33, 0.66]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 1, 2], [0, 0.25, 0.5, 1, 1.5, 2], [0, 0.5, 1, 2]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0, 0.5], [0, 0.25, 0.5, 0.75], [0]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 1], [0, 0.5, 1, 1.5], [0, 0.33, 0.66, 1]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0], [0, 0.33, 0.66], [0, 0.25, 0.5]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 1, 1.25, 1.5, 1.75, 2], [0, 0.33, 1, 1.66, 2]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.25, 0.5, 0.75, 1], [0, 1]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0, 0.5], [0], [0, 0.25, 0.5, 0.75]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.25, 0.5, 0.75, 1, 2], [0, 0.5, 1, 2], [0, 1, 2]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.33, 0.66, 1], [0, 0.5, 1], [0, 0.25, 0.5, 1]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0], [0, 0.5], [0, 0.33, 0.66]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 0.33, 0.66, 1, 2], [0, 1, 1.33, 1.66, 2]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0, 0.5], [0, 0.25, 0.5], [0]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 1], [0, 0.5, 1, 1.5], [0, 0.33, 0.66, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 1, 2], [0, 0.25, 0.5, 0.75, 1, 1.5, 2], [0, 0.5, 1, 1.5, 2]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0], [0, 0.5], [0, 0.25, 0.5, 0.75]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.25, 0.5, 0.75, 1], [0, 0.33, 0.66, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 2], [0, 1, 1.25, 1.5, 1.75, 2], [0, 0.33, 1, 2]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0, 0.5], [0, 0.33, 0.66], [0]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 1], [0, 0.5, 1], [0, 0.25, 0.5, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.25, 0.5, 0.75, 1, 2], [0, 0.5, 1, 1.5, 2], [0, 1, 2]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0], [0, 0.5], [0, 0.25, 0.5]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 0.5, 1], [0, 0.33, 0.66, 1], [0, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 0.5, 1, 1.5, 2], [0, 0.33, 0.66, 1, 1.33, 1.66, 2], [0, 1, 2]] },
+        { name: "2/4", beatsPerMeasure: 2, jumpBeat: 0, obstacleBeat: 1, duration: 2, rhythmPatterns: [[0, 0.5], [0], [0, 0.25, 0.5, 0.75]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 2, rhythmPatterns: [[0, 1], [0, 0.5, 1, 1.5], [0, 0.25, 0.5, 0.75, 1]] },
+        { name: "4/4", beatsPerMeasure: 4, jumpBeat: 2, obstacleBeat: 3, duration: 2, rhythmPatterns: [[0, 1, 2], [0, 0.5, 1, 2], [0, 0.25, 0.5, 1, 1.5, 2]] },
+        { name: "3/4", beatsPerMeasure: 3, jumpBeat: 1, obstacleBeat: 2, duration: 3, rhythmPatterns: [[0, 0.5, 1], [0, 0.33, 0.66, 1], [0, 1]] }
+    ]
+};

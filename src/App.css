@@ -312,6 +312,21 @@
   transform: scale(0.95);
 }
 
+/* Pattern buttons (round style) */
+.round-btn {
+  border-radius: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid #a78bfa;
+}
+
+.round-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow:
+    0 0 30px rgba(167, 139, 250, 0.6),
+    inset 0 0 15px rgba(167, 139, 250, 0.3);
+}
+
+
 .retry-btn:hover,
 .title-btn:hover {
   background: #00ff41;
