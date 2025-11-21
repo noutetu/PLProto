@@ -132,9 +132,14 @@ function TitleScreen({ onStart }) {
         <p className="audio-warning">※ 音声必須</p>
       </div>
 
-      <button className="start-btn" onClick={onStart}>
-        <span className="btn-icon">▶</span> START MONITORING
-      </button>
+      <div className="button-container">
+        <button className="start-btn secondary-btn" onClick={onStart}>
+          <span className="btn-icon">▶</span> チュートリアル
+        </button>
+        <button className="start-btn primary-btn" onClick={onStart}>
+          <span className="btn-icon">▶</span> START GAME
+        </button>
+      </div>
     </div>
   );
 }

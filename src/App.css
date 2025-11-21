@@ -255,7 +255,32 @@
 }
 
 /* Buttons */
-.start-btn,
+.button-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.start-btn {
+  background: var(--primary-color);
+  color: #000;
+  border: none;
+  padding: 12px 30px;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px var(--primary-color);
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  min-width: 200px;
+}
+
 .retry-btn,
 .title-btn {
   padding: 1rem 2.5rem;
@@ -277,7 +302,16 @@
   margin-right: 0.5rem;
 }
 
-.start-btn:hover,
+.start-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px var(--primary-color);
+  background: #fff;
+}
+
+.start-btn:active {
+  transform: scale(0.95);
+}
+
 .retry-btn:hover,
 .title-btn:hover {
   background: #00ff41;
