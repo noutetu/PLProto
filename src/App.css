@@ -825,7 +825,13 @@
 /* Ensure canvas fits and prevents gestures */
 canvas {
   max-width: 100%;
+  max-height: 100vh;
+  /* Ensure it fits vertically too */
   height: auto;
+  object-fit: contain;
+  /* Keep aspect ratio and fit within bounds */
   touch-action: none;
   /* Prevent browser gestures on the game canvas */
+  display: block;
+  /* Remove inline spacing */
 }
