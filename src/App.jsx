@@ -333,9 +333,15 @@ function GameScreen({ onEnd, level }) {
         pattern.push({ type: 'obstacle', x: x + 400, width: 40, height: 40 });
       };
 
-      // Use phases from level data
       const phases = levelData.phases;
       let currentTime = 0;
+      const beatInterval = GAME_CONFIG.RHYTHM.BEAT_INTERVAL; // seconds per beat
+
+      // Compute total time in seconds
+      const totalTime = phases.reduce((sum, phase) => {
+        // phase.duration is number of measures
+        return sum + phase.duration * phase.beatsPerMeasure * beatInterval;
+      }, 0);
 
       // Iterate through phases
       phases.forEach(phase => {
@@ -343,13 +349,10 @@ function GameScreen({ onEnd, level }) {
           const measureStartTime = currentTime;
 
           // 1. Rhythm Guides (Yellow)
-          // Select a random pattern valid for this phase
           const patIdx = Math.floor(Math.random() * phase.rhythmPatterns.length);
           const selectedPattern = phase.rhythmPatterns[patIdx];
 
           selectedPattern.forEach(offset => {
-            // Only add rhythm guide if it doesn't overlap with jump or obstacle
-            // (Simple check: strictly less than jump beat)
             if (offset < phase.jumpBeat) {
               const noteTime = measureStartTime + offset * beatInterval;
               addNote(noteTime, 'rhythm');
@@ -364,23 +367,32 @@ function GameScreen({ onEnd, level }) {
           const obstacleTime = measureStartTime + phase.obstacleBeat * beatInterval;
           addObstacle(obstacleTime);
 
-          // Advance time by measure length
+          // Advance time by one measure
           currentTime += phase.beatsPerMeasure * beatInterval;
         }
       });
 
-      return pattern;
+      return { pattern, totalTime };
     };
-
-    const levelData = generateLevel(level);
-    gameState.current.guides = levelData.filter(d => d.type !== 'obstacle');
-    gameState.current.obstacles = levelData.filter(d => d.type === 'obstacle');
+    const { pattern: levelPattern, totalTime: levelTotalTime } = generateLevel(level);
+    gameState.current.guides = levelPattern.filter(d => d.type !== 'obstacle');
+    gameState.current.obstacles = levelPattern.filter(d => d.type === 'obstacle');
 
 
     const update = () => {
       const now = audioManager.getRawTime();
       const currentSongTime = now - gameState.current.startTime;
       gameState.current.distance = currentSongTime * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
+
+      // End of level check
+      if (levelTotalTime && currentSongTime >= levelTotalTime) {
+        // Cancel animation loop
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
+        // Calculate final score (distance based) and indicate clear
+        const finalScore = Math.floor(gameState.current.distance / 100);
+        onEnd(finalScore, true, gameState.current.missCount);
+        return; // Stop further updates
+      }
 
       // Player Physics
       const player = gameState.current.player;
@@ -530,6 +542,8 @@ function GameScreen({ onEnd, level }) {
 
       // Check Game Over
       if (gameState.current.life <= 0) {
+        // Cancel animation loop
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
         const finalScore = Math.floor(gameState.current.distance / 100);
         onEnd(finalScore, false, gameState.current.missCount);
         return; // Stop loop
@@ -537,6 +551,8 @@ function GameScreen({ onEnd, level }) {
 
       // Check Clear (End of song)
       if (currentSongTime > 120) { // 120 seconds
+        // Cancel animation loop
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
         const finalScore = Math.floor(gameState.current.distance / 100);
         onEnd(finalScore, true, gameState.current.missCount);
         return;
