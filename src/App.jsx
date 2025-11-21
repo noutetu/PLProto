@@ -299,6 +299,7 @@ function GameScreen({ onEnd, level }) {
       nextBeat: 0,
       beatCount: 0,
       distance: 0,
+      prevDistance: 0, // For Continuous Collision Detection
       flash: { color: null, intensity: 0 },
       screenShake: { x: 0, y: 0, intensity: 0 },
       particles: [],
@@ -393,6 +394,9 @@ function GameScreen({ onEnd, level }) {
 
       const audioTime = audioManager.getRawTime();
       const currentSongTime = audioTime - gameState.current.startTime;
+
+      // Store previous distance for CCD
+      gameState.current.prevDistance = gameState.current.distance;
       gameState.current.distance = currentSongTime * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
 
       // End of level check
@@ -483,13 +487,21 @@ function GameScreen({ onEnd, level }) {
         star.brightness = 0.5 + Math.sin(now * 1000 * 0.001 + star.x) * 0.3;
       });
 
-      // Guide Overlap Check (for Flash & Sound)
+      // Guide Overlap Check (Continuous Collision Detection)
+      const triggerZoneStart = 115 - 150; // -35
+      const triggerZoneEnd = 115 + 150;   // 265
+
       gameState.current.guides.forEach(g => {
-        const screenX = g.x - gameState.current.distance;
-        // Check if guide is roughly at player position (x=100)
-        // Player width 30, x=100. Center approx 115.
-        // Widened range for high-speed scrolling and mobile frame variance
-        if (!g.triggered && Math.abs(screenX - 115) < 150) {
+        if (g.triggered) return;
+
+        const prevScreenX = g.x - gameState.current.prevDistance;
+        const currScreenX = g.x - gameState.current.distance;
+
+        // Check if the movement interval [currScreenX, prevScreenX] overlaps with [triggerZoneStart, triggerZoneEnd]
+        // Note: currScreenX < prevScreenX because objects move left
+        const overlap = Math.max(currScreenX, triggerZoneStart) <= Math.min(prevScreenX, triggerZoneEnd);
+
+        if (overlap) {
           g.triggered = true;
 
           // Enhanced effects based on guide type
@@ -533,16 +545,25 @@ function GameScreen({ onEnd, level }) {
         }
       });
 
-      // Collision Detection
+      // Collision Detection (Continuous)
       // Obstacles
       gameState.current.obstacles.forEach(obs => {
         if (obs.hit) return; // Skip already hit obstacles
 
-        const obsScreenX = obs.x - gameState.current.distance;
+        const prevObsScreenX = obs.x - gameState.current.prevDistance;
+        const currObsScreenX = obs.x - gameState.current.distance;
+        const obsWidth = obs.width;
 
-        // X-axis collision check - widened range for high-speed scrolling
-        // Check if obstacle is near player position (x=100, width=30, center ~115)
-        const xCollision = Math.abs(obsScreenX + obs.width / 2 - 115) < 150;
+        // Calculate center points for interval check
+        const prevCenter = prevObsScreenX + obsWidth / 2;
+        const currCenter = currObsScreenX + obsWidth / 2;
+
+        // Hit zone centered at 115 with radius 150
+        const hitZoneStart = 115 - 150;
+        const hitZoneEnd = 115 + 150;
+
+        // Check X overlap
+        const xCollision = Math.max(currCenter, hitZoneStart) <= Math.min(prevCenter, hitZoneEnd);
 
         // Y-axis collision check: if player is on ground (not jumping high enough)
         // Obstacle is at ground level (y=330), height 40, so top is at y=290
