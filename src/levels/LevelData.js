@@ -28,7 +28,7 @@ export const TutorialLevel = {
             beatsPerMeasure: 4,
             jumpBeat: 2, // 3rd beat
             obstacleBeat: 3, // 4th beat
-            duration: 32, // Long enough for practice
+            duration: 15, // 30 seconds (15 measures * 4 beats * 0.5s/beat)
             rhythmPatterns: [
                 [0, 1, 2],       // Simple: Tan, Tan, Tan
                 [0, 1, 1.5, 2],  // Variation: Tan, Tan, Ta-Ta

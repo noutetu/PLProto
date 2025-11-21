@@ -549,15 +549,6 @@ function GameScreen({ onEnd, level }) {
         return; // Stop loop
       }
 
-      // Check Clear (End of song)
-      if (currentSongTime > 120) { // 120 seconds
-        // Cancel animation loop
-        if (requestRef.current) cancelAnimationFrame(requestRef.current);
-        const finalScore = Math.floor(gameState.current.distance / 100);
-        onEnd(finalScore, true, gameState.current.missCount);
-        return;
-      }
-
       draw(ctx, currentSongTime);
       requestRef.current = requestAnimationFrame(update);
     };
