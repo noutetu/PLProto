@@ -17,7 +17,7 @@ const GAME_CONFIG = {
   PHYSICS: {
     SCROLL_SPEED: 10000, // Pixels per second
     GRAVITY: 8000, // Pixels/s^2
-    JUMP_VELOCITY: -4000, // Pixels/s
+    JUMP_VELOCITY: -2500, // Pixels/s
     GROUND_Y: 300, // Player's ground position
   },
   RHYTHM: {
