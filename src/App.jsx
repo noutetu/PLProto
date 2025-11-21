@@ -288,6 +288,7 @@ function GameScreen({ onEnd, level }) {
     // Initialize Game State
     gameState.current = {
       startTime: firstBeatTime, // Sync with audio
+      lastFrameTime: audioManager.getRawTime(), // Track frame time
       player: { x: GAME_CONFIG.PLAYER.START_X, y: GAME_CONFIG.PHYSICS.GROUND_Y, width: GAME_CONFIG.PLAYER.WIDTH, height: GAME_CONFIG.PLAYER.HEIGHT, velocity: 0, isJumping: false, groundY: GAME_CONFIG.PHYSICS.GROUND_Y },
       obstacles: [],
       guides: [], // { x, type: 'rhythm' | 'jump', hit: false }
@@ -381,6 +382,15 @@ function GameScreen({ onEnd, level }) {
 
     const update = () => {
       const now = audioManager.getRawTime();
+
+      // Calculate Delta Time
+      let dt = now - gameState.current.lastFrameTime;
+      gameState.current.lastFrameTime = now;
+
+      // Cap delta time to prevent huge jumps (e.g. if tab was inactive)
+      // Cap at 0.1s (10 FPS)
+      if (dt > 0.1) dt = 0.1;
+
       const currentSongTime = now - gameState.current.startTime;
       gameState.current.distance = currentSongTime * GAME_CONFIG.PHYSICS.SCROLL_SPEED;
 
@@ -397,8 +407,8 @@ function GameScreen({ onEnd, level }) {
       // Player Physics
       const player = gameState.current.player;
       if (player.isJumping) {
-        player.velocity += 8000 * 0.016; // Stronger Gravity for faster game
-        player.y += player.velocity * 0.016;
+        player.velocity += GAME_CONFIG.PHYSICS.GRAVITY * dt; // Use GRAVITY constant and dt
+        player.y += player.velocity * dt;
 
         if (player.y >= player.groundY) {
           player.y = player.groundY;
@@ -409,13 +419,13 @@ function GameScreen({ onEnd, level }) {
 
       // Flash Decay
       if (gameState.current.flash.intensity > 0) {
-        gameState.current.flash.intensity -= 0.04; // Slower fade out
+        gameState.current.flash.intensity -= GAME_CONFIG.VISUALS.FLASH_DECAY * (dt / 0.016); // Adjust decay for dt
         if (gameState.current.flash.intensity < 0) gameState.current.flash.intensity = 0;
       }
 
       // Screen Shake Decay
       if (gameState.current.screenShake.intensity > 0) {
-        gameState.current.screenShake.intensity -= 0.5;
+        gameState.current.screenShake.intensity -= GAME_CONFIG.VISUALS.SHAKE_DECAY * (dt / 0.016);
         if (gameState.current.screenShake.intensity < 0) gameState.current.screenShake.intensity = 0;
         gameState.current.screenShake.x = (Math.random() - 0.5) * gameState.current.screenShake.intensity;
         gameState.current.screenShake.y = (Math.random() - 0.5) * gameState.current.screenShake.intensity;
@@ -423,10 +433,10 @@ function GameScreen({ onEnd, level }) {
 
       // Update Particles
       gameState.current.particles = gameState.current.particles.filter(p => {
-        p.x += p.vx * 0.016;
-        p.y += p.vy * 0.016;
-        p.vy += 500 * 0.016; // Gravity
-        p.life -= 0.02;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += GAME_CONFIG.VISUALS.PARTICLE_GRAVITY * dt; // Gravity
+        p.life -= 1.25 * dt; // Approx 0.02 per 0.016s -> 1.25 per second
         return p.life > 0;
       });
 
@@ -437,22 +447,29 @@ function GameScreen({ onEnd, level }) {
         life: 1.0
       });
       gameState.current.trail = gameState.current.trail.filter(t => {
-        t.life -= 0.05;
+        t.life -= 3.125 * dt; // Approx 0.05 per 0.016s -> 3.125 per second
         return t.life > 0;
       });
 
       // Update Score Display (smooth animation)
       const targetScore = Math.floor(gameState.current.distance / 100);
-      gameState.current.scoreDisplay += (targetScore - gameState.current.scoreDisplay) * 0.1;
+      // Lerp factor adjustment for dt: 0.1 per 60fps frame -> ~60 * 0.1 = 6 per second?
+      // Lerp formula: current + (target - current) * factor
+      // Frame independent lerp: current + (target - current) * (1 - exp(-decay * dt))
+      // For simplicity, just scaling the factor: 0.1 * (dt / 0.016)
+      const lerpFactor = Math.min(1, 0.1 * (dt / 0.016));
+      gameState.current.scoreDisplay += (targetScore - gameState.current.scoreDisplay) * lerpFactor;
 
       // Update Background Offset
       gameState.current.backgroundOffset = (gameState.current.distance * 0.5) % 100;
 
       // Update Stars (parallax scrolling)
-      const speed = GAME_CONFIG.PHYSICS.SCROLL_SPEED / 60; // Convert to per-frame speed
+      // Original: speed = SCROLL_SPEED / 60 per frame
+      // New: speed = SCROLL_SPEED * dt
+      const starSpeed = GAME_CONFIG.PHYSICS.SCROLL_SPEED * dt;
       gameState.current.stars.forEach(star => {
         // Stars move based on depth (z) - closer stars move faster
-        star.x -= speed * star.z * 0.5;
+        star.x -= starSpeed * star.z * 0.5;
 
         // Wrap around when star goes off screen
         if (star.x < -10) {
@@ -462,7 +479,7 @@ function GameScreen({ onEnd, level }) {
         }
 
         // Twinkle effect
-        star.brightness = 0.5 + Math.sin(Date.now() * 0.001 + star.x) * 0.3;
+        star.brightness = 0.5 + Math.sin(now * 1000 * 0.001 + star.x) * 0.3;
       });
 
       // Guide Overlap Check (for Flash & Sound)
