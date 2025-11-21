@@ -17,7 +17,7 @@ const GAME_CONFIG = {
   PHYSICS: {
     SCROLL_SPEED: 10000, // Pixels per second
     GRAVITY: 8000, // Pixels/s^2
-    JUMP_VELOCITY: -2500, // Pixels/s
+    JUMP_VELOCITY: -2400, // Pixels/s
     GROUND_Y: 300, // Player's ground position
   },
   RHYTHM: {
@@ -488,8 +488,8 @@ function GameScreen({ onEnd, level }) {
         const screenX = g.x - gameState.current.distance;
         // Check if guide is roughly at player position (x=100)
         // Player width 30, x=100. Center approx 115.
-        // Widened range for high-speed scrolling
-        if (!g.triggered && Math.abs(screenX - 115) < 100) {
+        // Widened range for high-speed scrolling and mobile frame variance
+        if (!g.triggered && Math.abs(screenX - 115) < 150) {
           g.triggered = true;
 
           // Enhanced effects based on guide type
@@ -542,7 +542,7 @@ function GameScreen({ onEnd, level }) {
 
         // X-axis collision check - widened range for high-speed scrolling
         // Check if obstacle is near player position (x=100, width=30, center ~115)
-        const xCollision = Math.abs(obsScreenX + obs.width / 2 - 115) < 100;
+        const xCollision = Math.abs(obsScreenX + obs.width / 2 - 115) < 150;
 
         // Y-axis collision check: if player is on ground (not jumping high enough)
         // Obstacle is at ground level (y=330), height 40, so top is at y=290

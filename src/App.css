@@ -1,6 +1,23 @@
 /* Heart Rate Monitor Theme */
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
 
+/* Game Container to maintain aspect ratio */
+.game-container {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  border: 1px solid #333;
+  margin: auto;
+  /* Center vertically and horizontally */
+  max-height: 90vh;
+  /* Leave space for padding */
+}
+
 .app-container {
   width: 100vw;
   height: 100vh;
